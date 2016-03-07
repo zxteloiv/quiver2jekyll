@@ -64,6 +64,7 @@ target/
 *.swp
 *.log
 *.tmp
+tmp
 .idea
 *.out
 *.err
