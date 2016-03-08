@@ -19,11 +19,17 @@ parser.add_argument('--title', type=lambda x: unicode(x, 'utf-8'),
         help='Overwrite the title in note or notebook, '
         'which will be used as directory name.')
 
+def load_jekyll_page_tpl(filename=None):
+    filename = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        u'template.md') if filename is None else filename
+    with open(filename, 'r') as f:
+        data = f.read()
+    return data
+
 def note_to_md(meta, content):
     """ To produce note representation in markdown """
     title = meta[u'title']
-    tpl = open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-        u'template.md'), 'r').read()
+    tpl = load_jekyll_page_tpl()
 
     tmpdata = u''
     for c in content[u'cells']:
@@ -65,6 +71,8 @@ def export_note(in_path, out_path, title=None):
     if os.path.exists(res_dir):
         distutils.dir_util.copy_tree(res_dir, os.path.join(md_dir, 'resources'))
 
+    return title
+
 def export_notebook(in_path, out_path, title=None):
     meta = json.loads(open(os.path.join(in_path, u'meta.json'), 'r').read())
     title = meta[u'title'] if title is None else title
@@ -78,8 +86,23 @@ def export_notebook(in_path, out_path, title=None):
         os.mkdir(notebook_path)
 
     # find each note inside the notebook, export each one
-    for note_in_path in (x for x in os.listdir(in_path) if 'qvnote' in x):
-        export_note(os.path.join(in_path, note_in_path), notebook_path)
+    # build the index.md for notebook dir, too
+    nb_content = ''
+    for note_dir in (x for x in os.listdir(in_path) if 'qvnote' in x):
+        note_title = export_note(os.path.join(in_path, note_dir), notebook_path)
+
+        # when exporting a notebook, note title are used as relative path
+        nb_content += u'\n[%s](%s)\n' % (note_title, note_title.replace(u'/', u':'))
+
+    # write notebook index.md
+    tpl = load_jekyll_page_tpl()
+    note_index = tpl.format(title=title.encode('utf-8'),
+            content=nb_content.encode('utf-8'))
+
+    with open(os.path.join(notebook_path, 'index.md'), 'w') as f:
+        f.write(note_index)
+
+    return title
 
 def main(args):
     pathlist = os.path.normpath(args.in_path).split(os.sep)
