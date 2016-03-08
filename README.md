@@ -3,7 +3,7 @@ Export Quiver notes and notebooks into jekyll pages.
 
 [Quiver](http://happenapps.com/#quiver) is an excellent markdown notebook on Mac OS X and stays in active development with a kind programmer.
 
-This tool helps you to export either a Quiver note or Quiver notebook into several Jekyll Pages, which make you publish your Quiver notes to Jekyll blogs easily.  
+This tool helps you export either a Quiver note or Quiver notebook into several Jekyll Pages, which makes you publish your Quiver notes to Jekyll blogs easily.  
 Quiver GUI itself has provided the functionality to export notes but only in rendered html files. This has some limitations.
 
 To convert notes into Jekyll markdown, you will benefit from several merits:
@@ -15,11 +15,11 @@ To convert notes into Jekyll markdown, you will benefit from several merits:
 
 Also you have some new limitations.
 
-- Markdown in Quiver is restricted to Kramdown syntax only, although Quiver support many dialects of markdown. Otherwise GitHub Pages will note render your note correctly. Here are some examples:
+- Markdown in Quiver is restricted to Kramdown syntax only, although Quiver support many dialects of markdown. Otherwise GitHub Pages will not render your note correctly. Here are some examples:
     - no \`\`\` but only \~\~\~ to mean fenced code
     - inline formula must also be written inside double dollar signs
     - spare an empty line before every fenced code and maybe other structures
-- Maybe in the future Quiver will have more cell types or richer format in cells types it already has. Exporting tools may bring the risk to delay.
+- Maybe in the future Quiver will have more cell types or richer format in cells types which it already has. Exporting tools may bring the risk of delay.
 
 ### Usage
 
