@@ -28,7 +28,7 @@ def load_jekyll_page_tpl(filename=None):
 
 def note_to_md(meta, content):
     """ To produce note representation in markdown """
-    title = meta[u'title']
+    title = make_valid_title(meta[u'title'])
     tpl = load_jekyll_page_tpl()
 
     tmpdata = u''
@@ -50,6 +50,12 @@ def note_to_md(meta, content):
             content=tmpdata.encode('utf-8'))
     return jekyllmd
 
+def make_valid_title(title):
+    title = re.sub(u'[/: ]+', u'_', title).strip()
+    if not title:
+        title = "Empty_Title"
+    return title
+
 def export_note(in_path, out_path, title=None):
     meta = json.loads(open(os.path.join(in_path, u'meta.json'), 'r').read())
     content = json.loads(open(os.path.join(in_path, u'content.json'), 'r').read())
@@ -58,7 +64,7 @@ def export_note(in_path, out_path, title=None):
 
     # make dir for the note
     title = title if title is not None else meta[u'title']
-    md_dir = os.path.join(out_path, title.replace(u'/', u':'))
+    md_dir = os.path.join(out_path, make_valid_title(title))
     if not os.path.exists(md_dir):
         os.mkdir(md_dir)
 
@@ -75,13 +81,13 @@ def export_note(in_path, out_path, title=None):
 
 def export_notebook(in_path, out_path, title=None):
     meta = json.loads(open(os.path.join(in_path, u'meta.json'), 'r').read())
-    title = meta[u'title'] if title is None else title
+    title = meta[u'name'] if title is None else title
 
     in_path = os.path.expanduser(in_path)
     out_path = os.path.expanduser(out_path)
 
     # make output dir for the whole notebook
-    notebook_path = os.path.join(out_path, title.replace(u'/', u':'))
+    notebook_path = os.path.join(out_path, make_valid_title(title))
     if not os.path.exists(notebook_path):
         os.mkdir(notebook_path)
 
@@ -92,7 +98,7 @@ def export_notebook(in_path, out_path, title=None):
         note_title = export_note(os.path.join(in_path, note_dir), notebook_path)
 
         # when exporting a notebook, note title are used as relative path
-        nb_content += u'\n[%s](%s)\n' % (note_title, note_title.replace(u'/', u':'))
+        nb_content += u'\n[{0}]({0})\n'.format(make_valid_title(note_title))
 
     # write notebook index.md
     tpl = load_jekyll_page_tpl()

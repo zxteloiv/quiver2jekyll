@@ -15,7 +15,10 @@ To convert notes into Jekyll markdown, you will benefit from several merits:
 
 Also you have some new limitations.
 
-- Markdown in Quiver is restricted to Kramdown syntax only, although Quiver support many dialects of markdown. Otherwise GitHub Pages will note render your note correctly.
+- Markdown in Quiver is restricted to Kramdown syntax only, although Quiver support many dialects of markdown. Otherwise GitHub Pages will note render your note correctly. Here are some examples:
+    - no \`\`\` but only \~\~\~ to mean fenced code
+    - inline formula must also be written inside double dollar signs
+    - spare an empty line before every fenced code and maybe other structures
 - Maybe in the future Quiver will have more cell types or richer format in cells types it already has. Exporting tools may bring the risk to delay.
 
 ### Usage
