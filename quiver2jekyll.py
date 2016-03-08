@@ -8,15 +8,15 @@ from distutils import dir_util
 parser = argparse.ArgumentParser(
         description='Turn quiver notes or notebooks to jekyll markdown.')
 
-parser.add_argument('input_path',
+parser.add_argument('in_path',
         help='/path/to/quiver/note.'
         'This path can also be quiver notebook(.qvnotebook).')
 
-parser.add_argument('output_path',
+parser.add_argument('out_path',
         help='Directory path to save the output jekyll markdown.')
 
-parser.add_argument('--title',
-        help='overwrite the title in note or notebook, '
+parser.add_argument('--title', type=lambda x: unicode(x, 'utf-8'),
+        help='Overwrite the title in note or notebook, '
         'which will be used as directory name.')
 
 def note_to_md(meta, content):
@@ -32,7 +32,7 @@ def note_to_md(meta, content):
                     re.sub('quiver-image-url', u'resources', c['data'])
                     + u'</div>\n')
         elif c['type'] == 'markdown':
-            tmpdata += u'\n' + c.data + u'\n'
+            tmpdata += u'\n' + c['data'] + u'\n'
         elif c['type'] == 'code':
             tmpdata += u'\n~~~ ' + c['language'] + u'\n' + c['data'] + u'\n~~~\n'
         elif c['type'] == 'latex':
@@ -44,9 +44,9 @@ def note_to_md(meta, content):
             content=tmpdata.encode('utf-8'))
     return jekyllmd
 
-def export_note(input_path, out_path, title=None):
-    meta = json.loads(open(os.path.join(input_path, u'meta.json'), 'r').read())
-    content = json.loads(open(os.path.join(input_path, u'content.json'), 'r').read())
+def export_note(in_path, out_path, title=None):
+    meta = json.loads(open(os.path.join(in_path, u'meta.json'), 'r').read())
+    content = json.loads(open(os.path.join(in_path, u'content.json'), 'r').read())
 
     jekyllmd = note_to_md(meta, content)
 
@@ -61,19 +61,33 @@ def export_note(input_path, out_path, title=None):
         f.write(jekyllmd)
 
     # copy resources for that note
-    res_dir = os.path.join(input_path, 'resources')
+    res_dir = os.path.join(in_path, 'resources')
     if os.path.exists(res_dir):
         distutils.dir_util.copy_tree(res_dir, os.path.join(md_dir, 'resources'))
 
-def export_notebook(input_path, out_path, title=None):
-    pass
+def export_notebook(in_path, out_path, title=None):
+    meta = json.loads(open(os.path.join(in_path, u'meta.json'), 'r').read())
+    title = meta[u'title'] if title is None else title
+
+    in_path = os.path.expanduser(in_path)
+    out_path = os.path.expanduser(out_path)
+
+    # make output dir for the whole notebook
+    notebook_path = os.path.join(out_path, title.replace(u'/', u':'))
+    if not os.path.exists(notebook_path):
+        os.mkdir(notebook_path)
+
+    # find each note inside the notebook, export each one
+    for note_in_path in (x for x in os.listdir(in_path) if 'qvnote' in x):
+        export_note(os.path.join(in_path, note_in_path), notebook_path)
 
 def main(args):
-    pathlist = os.path.normpath(args.input_path).split(os.sep)
+    pathlist = os.path.normpath(args.in_path).split(os.sep)
+    # since qvnote is a substring of qvnotebook, check qvnotebook first
     if 'qvnotebook' in pathlist[-1]:
-        export_notebook(args.input_path, args.output_path, args.title)
+        export_notebook(args.in_path, args.out_path, args.title)
     elif 'qvnote' in pathlist[-1]:
-        export_note(args.input_path, args.output_path, args.title)
+        export_note(args.in_path, args.out_path, args.title)
     else:
         pass
 
