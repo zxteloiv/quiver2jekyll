@@ -51,7 +51,7 @@ def note_to_md(meta, content):
     return jekyllmd
 
 def make_valid_title(title):
-    title = re.sub(u'[/: ]+', u'_', title).strip()
+    title = re.sub(u'[-/: ]+', u'_', title).strip()
     if not title:
         title = "Empty_Title"
     return title
