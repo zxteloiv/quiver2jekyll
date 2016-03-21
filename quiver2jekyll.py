@@ -28,7 +28,7 @@ def load_jekyll_page_tpl(filename=None):
 
 def note_to_md(meta, content):
     """ To produce note representation in markdown """
-    title = make_valid_title(meta[u'title'])
+    title = make_valid_title_path(meta[u'title'], is_path=False)
     tpl = load_jekyll_page_tpl()
 
     tmpdata = u''
@@ -50,8 +50,13 @@ def note_to_md(meta, content):
             content=tmpdata.encode('utf-8'))
     return jekyllmd
 
-def make_valid_title(title):
-    title = re.sub(u'[-/: ]+', u'_', title).strip()
+def make_valid_title_path(title, is_path=True):
+    """
+    Make valid title or path.
+    Substitute with space for title, whereas underscore for path.
+    """
+    title = re.sub(u'[-/: ]+', u'_' if is_path else u' '
+            , title).strip()
     if not title:
         title = "Empty_Title"
     return title
@@ -64,7 +69,7 @@ def export_note(in_path, out_path, title=None):
 
     # make dir for the note
     title = title if title is not None else meta[u'title']
-    md_dir = os.path.join(out_path, make_valid_title(title))
+    md_dir = os.path.join(out_path, make_valid_title_path(title))
     if not os.path.exists(md_dir):
         os.mkdir(md_dir)
 
@@ -87,7 +92,7 @@ def export_notebook(in_path, out_path, title=None):
     out_path = os.path.expanduser(out_path)
 
     # make output dir for the whole notebook
-    notebook_path = os.path.join(out_path, make_valid_title(title))
+    notebook_path = os.path.join(out_path, make_valid_title_path(title))
     if not os.path.exists(notebook_path):
         os.mkdir(notebook_path)
 
@@ -98,7 +103,7 @@ def export_notebook(in_path, out_path, title=None):
         note_title = export_note(os.path.join(in_path, note_dir), notebook_path)
 
         # when exporting a notebook, note title are used as relative path
-        nb_content += u'\n[{0}]({0})\n'.format(make_valid_title(note_title))
+        nb_content += u'\n[{0}]({0})\n'.format(make_valid_title_path(note_title))
 
     # write notebook index.md
     tpl = load_jekyll_page_tpl()
