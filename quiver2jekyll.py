@@ -1,9 +1,11 @@
 #!/usr/bin/env python2
 # coding: utf-8
 
-import os, argparse, json, re
+import os, argparse, json, re, sys
 import distutils
 from distutils import dir_util
+
+PY3 = sys.version_info >= (3,)
 
 parser = argparse.ArgumentParser(
         description='Turn quiver notes or notebooks to jekyll markdown.')
@@ -15,7 +17,7 @@ parser.add_argument('in_path',
 parser.add_argument('out_path',
         help='Directory path to save the output jekyll markdown.')
 
-parser.add_argument('--title', type=lambda x: unicode(x, 'utf-8'),
+parser.add_argument('--title', type=lambda x: x if PY3 else unicode(x, 'utf-8'),
         help='Overwrite the title in note or notebook, '
         'which will be used as directory name.')
 
@@ -24,7 +26,7 @@ def load_jekyll_page_tpl(filename=None):
         u'template.md') if filename is None else filename
     with open(filename, 'r') as f:
         data = f.read()
-    return data
+    return data if PY3 else data.decode('utf-8')
 
 def note_to_md(meta, content):
     """ To produce note representation in markdown """
@@ -46,8 +48,7 @@ def note_to_md(meta, content):
         else:
             tmpdata += u'\n' + c['data'] + u'\n'
 
-    jekyllmd = tpl.format(title=title.encode('utf-8'),
-            content=tmpdata.encode('utf-8'))
+    jekyllmd = tpl.format(title=title, content=tmpdata)
     return jekyllmd
 
 def make_valid_title_path(title, is_path=True):
@@ -58,7 +59,7 @@ def make_valid_title_path(title, is_path=True):
     title = re.sub(u'[-/: ]+', u'_' if is_path else u' '
             , title).strip()
     if not title:
-        title = "Empty_Title"
+        title = u"Empty_Title"
     return title
 
 def export_note(in_path, out_path, title=None):
@@ -74,8 +75,8 @@ def export_note(in_path, out_path, title=None):
         os.mkdir(md_dir)
 
     # write note content in markdown
-    with open(os.path.join(md_dir, 'index.md'), 'w') as f:
-        f.write(jekyllmd)
+    with open(os.path.join(md_dir, 'index.md'), 'wb') as f:
+        f.write(jekyllmd.encode('utf-8'))
 
     # copy resources for that note
     res_dir = os.path.join(in_path, 'resources')
@@ -107,11 +108,10 @@ def export_notebook(in_path, out_path, title=None):
 
     # write notebook index.md
     tpl = load_jekyll_page_tpl()
-    note_index = tpl.format(title=title.encode('utf-8'),
-            content=nb_content.encode('utf-8'))
+    note_index = tpl.format(title=title, content=nb_content)
 
-    with open(os.path.join(notebook_path, 'index.md'), 'w') as f:
-        f.write(note_index)
+    with open(os.path.join(notebook_path, 'index.md'), 'wb') as f:
+        f.write(note_index.encode('utf-8'))
 
     return title
 
