@@ -56,7 +56,7 @@ def make_valid_title_path(title, is_path=True):
     Make valid title or path.
     Substitute with space for title, whereas underscore for path.
     """
-    title = re.sub(u'[-/: ]+', u'_' if is_path else u' '
+    title = re.sub(u'[-/: &]+', u'_' if is_path else u' '
             , title).strip()
     if not title:
         title = u"Empty_Title"
