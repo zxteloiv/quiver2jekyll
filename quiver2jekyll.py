@@ -99,12 +99,14 @@ def export_notebook(in_path, out_path, title=None):
 
     # find each note inside the notebook, export each one
     # build the index.md for notebook dir, too
-    nb_content = ''
+    note_titles = []
     for note_dir in (x for x in os.listdir(in_path) if 'qvnote' in x):
         note_title = export_note(os.path.join(in_path, note_dir), notebook_path)
+        note_titles.append(note_title)
 
-        # when exporting a notebook, note title are used as relative path
-        nb_content += u'\n[{0}]({0})\n'.format(make_valid_title_path(note_title))
+    # when exporting a notebook, note title are used as relative path
+    nb_content = u"\n\n".join(u"[{0}]({0})".format(make_valid_title_path(title))
+           for title in sorted(note_titles))
 
     # write notebook index.md
     tpl = load_jekyll_page_tpl()
