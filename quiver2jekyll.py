@@ -40,7 +40,7 @@ def note_to_md(meta, content):
                     re.sub('quiver-image-url', u'resources', c['data'])
                     + u'</div>\n')
         elif c['type'] == 'markdown':
-            tmpdata += u'\n' + c['data'] + u'\n'
+            tmpdata += u'\n' + re.sub('quiver-image-url', u'resources', c['data']) + u'\n'
         elif c['type'] == 'code':
             tmpdata += u'\n~~~ ' + c['language'] + u'\n' + c['data'] + u'\n~~~\n'
         elif c['type'] == 'latex':
